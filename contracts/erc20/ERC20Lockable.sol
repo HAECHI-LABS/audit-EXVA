@@ -4,6 +4,7 @@ pragma solidity 0.8.0;
 
 import "./ERC20.sol";
 import "../library/Ownable.sol";
+import "hardhat/console.sol";
 
 abstract contract ERC20Lockable is ERC20, Ownable {
     struct LockInfo {
@@ -52,9 +53,10 @@ abstract contract ERC20Lockable is ERC20, Ownable {
     }
 
     function unlockAll(address from) external returns (bool success) {
-        for(uint256 i = 0; i < _locks[from].length; i++){
-            if(_locks[from][i].due < block.timestamp){
-                if(_unlock(from, i)){
+        for(uint256 i = 0; i < _locks[from].length;){
+            i++;
+            if(_locks[from][i - 1].due < block.timestamp){
+                if(_unlock(from, i - 1)){
                     i--;
                 }
             }
@@ -67,8 +69,9 @@ abstract contract ERC20Lockable is ERC20, Ownable {
     onlyOwner
     returns (bool success)
     {
-        for(uint256 i = 0; i < _locks[from].length; i++){
-            if(_unlock(from, i)){
+        for(uint256 i = 0; i < _locks[from].length;){
+            i++;
+            if(_unlock(from, i - 1)){
                 i--;
             }
         }
